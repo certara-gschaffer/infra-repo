@@ -1,0 +1,31 @@
+name: update_stuff
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to set in helm.yaml"
+        required: true
+        type: string
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Update version in helm.yaml
+        run: |
+          sed -i "s/^version=.*/version=${{ inputs.version }}/" helm.yaml
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add helm.yaml
+          git commit -m "Update version to ${{ inputs.version }}"
+          git push origin main
